@@ -226,7 +226,7 @@ func newDriver(logger log.Logger, persistence adapter.StatePersistence, layers i
 		m.When("Forget", mock.Any).Return(nil).Times(1)
 	}
 	d := &driver{
-		inner: newRollingRevisions(logger, persistence, layers, m),
+		inner: newRollingRevisions(logger, persistence, layers, m, primitives.Sha256{}),
 	}
 	return d
 }
@@ -284,7 +284,12 @@ func (spm *StatePersistenceMock) Read(contract primitives.ContractName, key stri
 	return []byte(fmt.Sprintf("%v", ret.Get(0))), ret.Bool(1), ret.Error(2)
 }
 func (spm *StatePersistenceMock) ReadMetadata() (primitives.BlockHeight, primitives.TimestampNano, primitives.TimestampSeconds, primitives.TimestampSeconds, primitives.NodeAddress, primitives.Sha256, error) {
-	return 0, 0, 0, 0, []byte{}, primitives.Sha256{}, nil
+	return 0, 0, 0, 0, []byte{}, primitives.Sha256{1}, nil
+}
+
+func (smp *StatePersistenceMock) FullState() adapter.ChainState {
+	c := make(adapter.ChainState)
+	return c
 }
 
 type MerkleMock struct {

@@ -46,15 +46,15 @@ func NewStatePersistence(metricFactory metric.Factory) *InMemoryStatePersistence
 	_, merkleRoot := merkle.NewForest()
 	// TODO(https://github.com/orbs-network/orbs-network-go/issues/582) - this is our hard coded Genesis block (height 0). Move this to a more dignified place or load from a file
 	return &InMemoryStatePersistence{
-		metrics:    newMetrics(metricFactory),
-		mutex:      sync.RWMutex{},
-		fullState:  adapter.ChainState{},
-		height:     0,
-		ts:         0,
-		refTime:    0,
-		prevRefTime:0,
-		proposer:   []byte{},
-		merkleRoot: merkleRoot,
+		metrics:     newMetrics(metricFactory),
+		mutex:       sync.RWMutex{},
+		fullState:   adapter.ChainState{},
+		height:      0,
+		ts:          0,
+		refTime:     0,
+		prevRefTime: 0,
+		proposer:    []byte{},
+		merkleRoot:  merkleRoot,
 	}
 }
 
@@ -74,8 +74,8 @@ func (sp *InMemoryStatePersistence) Write(height primitives.BlockHeight, ts prim
 	defer sp.mutex.Unlock()
 
 	sp.height = height
-    sp.refTime = refTime
-    sp.prevRefTime = prevRefTime
+	sp.refTime = refTime
+	sp.prevRefTime = prevRefTime
 	sp.proposer = proposer
 	sp.ts = ts
 	sp.merkleRoot = root
@@ -147,6 +147,10 @@ func (sp *InMemoryStatePersistence) Dump() string {
 	}
 	output.WriteString("}}")
 	return output.String()
+}
+
+func (sp *InMemoryStatePersistence) FullState() adapter.ChainState {
+	return sp.fullState
 }
 
 func isZeroValue(value []byte) bool {

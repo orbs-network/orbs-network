@@ -56,20 +56,26 @@ type service struct {
 }
 
 func NewStateStorage(config config.StateStorageConfig, persistence adapter.StatePersistence, heightReporter adapter.BlockHeightReporter, parent log.Logger, metricFactory metric.Factory) services.StateStorage {
-	forest, _ := merkle.NewForest()
+	forest, merkleRoot := merkle.NewForest()
 	logger := parent.WithTags(LogTag)
 	if heightReporter == nil {
 		heightReporter = synchronization.NopHeightReporter{}
 	}
+
+	blockHeight, _, _, _, _, _, err := persistence.ReadMetadata()
+	if err != nil {
+		panic("failed to read metadata from the state storage")
+	}
+
 	return &service{
 		config:         config,
-		blockTracker:   synchronization.NewBlockTracker(logger, 0, uint16(config.BlockTrackerGraceDistance())),
+		blockTracker:   synchronization.NewBlockTracker(logger, uint64(blockHeight), uint16(config.BlockTrackerGraceDistance())),
 		heightReporter: heightReporter,
 		logger:         logger,
 		metrics:        newMetrics(metricFactory),
 
 		mutex:     sync.RWMutex{},
-		revisions: newRollingRevisions(logger, persistence, int(config.StateStorageHistorySnapshotNum()), forest),
+		revisions: newRollingRevisions(logger, persistence, int(config.StateStorageHistorySnapshotNum()), forest, merkleRoot),
 	}
 }
 

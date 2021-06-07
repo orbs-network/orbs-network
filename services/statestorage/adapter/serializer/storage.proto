@@ -1,0 +1,27 @@
+syntax = "proto3";
+package serializer;
+option go_package = "github.com/orbs-network/orbs-network-go/services/statestorage/adapter/serializer";
+
+import "../orbs-spec/interfaces/primitives/protocol.proto";
+import "../orbs-spec/interfaces/primitives/crypto.proto";
+
+// replace "github.com/orbs-network/orbs-spec/interfaces/primitives"
+// with "github.com/orbs-network/orbs-spec/types/go/primitives"
+
+message SerializedContractKeyValueEntry {
+    primitives.contract_name contract_name = 1;
+    bytes key = 2;
+    bytes value = 3;
+}
+
+message SerializedMemoryPersistence {
+    primitives.block_height block_height = 1;
+    primitives.timestamp_nano timestamp = 2;
+    primitives.sha256 merkle_root_hash = 3;
+    primitives.node_address proposer = 4;
+
+    primitives.timestamp_seconds reference_time = 5;
+    primitives.timestamp_seconds previous_reference_time = 6;
+
+    repeated SerializedContractKeyValueEntry entries = 7;
+}

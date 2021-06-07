@@ -18,4 +18,5 @@ type StatePersistence interface {
 	Write(height primitives.BlockHeight, ts primitives.TimestampNano, refTime primitives.TimestampSeconds, prevRefTime primitives.TimestampSeconds, proposer primitives.NodeAddress, root primitives.Sha256, diff ChainState) error
 	Read(contract primitives.ContractName, key string) ([]byte, bool, error)
 	ReadMetadata() (primitives.BlockHeight, primitives.TimestampNano, primitives.TimestampSeconds, primitives.TimestampSeconds, primitives.NodeAddress, primitives.Sha256, error)
+	FullState() ChainState
 }

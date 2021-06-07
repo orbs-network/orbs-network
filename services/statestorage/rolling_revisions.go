@@ -55,10 +55,18 @@ type rollingRevisions struct {
 	persistedPrevRefTime primitives.TimestampSeconds
 }
 
-func newRollingRevisions(logger log.Logger, persist adapter.StatePersistence, transientRevisions int, merkle merkleRevisions) *rollingRevisions {
+func newRollingRevisions(logger log.Logger, persist adapter.StatePersistence, transientRevisions int, merkle merkleRevisions, root primitives.Sha256) *rollingRevisions {
 	h, ts, ref, prevRef, pa, r, err := persist.ReadMetadata()
 	if err != nil {
 		panic(fmt.Sprintf("could not load state metadata, err=%s", err.Error()))
+	}
+
+	newRoot, err := merkle.Update(root, toMerkleInput(persist.FullState()))
+	if err != nil {
+		panic(fmt.Sprintf("could not calculate merkle from chain state"))
+	}
+	if !bytes.Equal(newRoot, r) {
+		panic(fmt.Sprintf("merle root of state storage is corrupted: %s vs %s", newRoot, r))
 	}
 
 	result := &rollingRevisions{

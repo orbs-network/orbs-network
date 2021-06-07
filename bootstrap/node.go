@@ -20,7 +20,7 @@ import (
 	"github.com/orbs-network/orbs-network-go/services/management"
 	managementAdapter "github.com/orbs-network/orbs-network-go/services/management/adapter"
 	nativeProcessorAdapter "github.com/orbs-network/orbs-network-go/services/processor/native/adapter"
-	stateStorageAdapter "github.com/orbs-network/orbs-network-go/services/statestorage/adapter/memory"
+	"github.com/orbs-network/orbs-network-go/services/statestorage/adapter/serializer"
 	txPoolAdapter "github.com/orbs-network/orbs-network-go/services/transactionpool/adapter"
 	"github.com/orbs-network/orbs-network-go/synchronization/supervised"
 	"github.com/orbs-network/scribe/log"
@@ -35,6 +35,7 @@ type Node struct {
 	transport        *tcp.DirectTransport
 	logger           log.Logger
 	blockPersistence *filesystem.BlockPersistence
+	statePersistence serializer.MemoryPersistenceWrapper
 }
 
 func GetMetricRegistry(nodeConfig config.NodeConfig) metric.Registry {
@@ -76,7 +77,7 @@ func NewNode(nodeConfig config.NodeConfig, logger log.Logger) *Node {
 		panic(fmt.Sprintf("failed initializing blocks database, err=%s", err.Error()))
 	}
 
-	statePersistence := stateStorageAdapter.NewStatePersistence(metricRegistry)
+	statePersistence := serializer.NewInMemoryPersistenceWrapper(nodeConfig, logger, metricRegistry)
 	ethereumConnection := ethereumAdapter.NewEthereumRpcConnection(nodeConfig, logger, metricRegistry)
 	nativeCompiler := nativeProcessorAdapter.NewNativeCompiler(nodeConfig, nodeLogger, metricRegistry)
 	nodeLogic := NewNodeLogic(ctx,
@@ -92,11 +93,13 @@ func NewNode(nodeConfig config.NodeConfig, logger log.Logger) *Node {
 		transport:        transport,
 		httpServer:       httpServer,
 		blockPersistence: blockPersistence,
+		statePersistence: statePersistence,
 	}
 
 	// TODO re-enable Ethereum access (with refTime based finality)
 	// ethereumConnection.ReportConnectionStatus(ctx)
 
+	n.Supervise(statePersistence)
 	n.Supervise(ethereumConnection)
 	n.Supervise(nodeLogic)
 	n.Supervise(transport)
@@ -107,5 +110,5 @@ func NewNode(nodeConfig config.NodeConfig, logger log.Logger) *Node {
 func (n *Node) GracefulShutdown(shutdownContext context.Context) {
 	n.logger.Info("Shutting down")
 	n.cancelFunc()
-	supervised.ShutdownAllGracefully(shutdownContext, n.httpServer, n.transport, n.blockPersistence)
+	supervised.ShutdownAllGracefully(shutdownContext, n.httpServer, n.transport, n.blockPersistence, n.statePersistence)
 }
