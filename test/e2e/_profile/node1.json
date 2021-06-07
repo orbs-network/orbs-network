@@ -1,0 +1,15 @@
+{
+  "virtual-chain-id": 1000002,
+  "gossip-listen-port": 4400,
+  "node-address": "a328846cd5b4979d68a8c58a9bdfeee657b34de7",
+  "benchmark-consensus-constant-leader": "a328846cd5b4979d68a8c58a9bdfeee657b34de7",
+  "ethereum-endpoint": "http://192.168.199.6:8545",
+  "logger-full-log": true,
+  "processor-sanitize-deployed-contracts": false,
+  "signer-endpoint": "http://192.168.199.9:7777",
+  "experimental-external-processor-plugin-path": "/opt/orbs/plugins/orbs-dummy-plugin",
+  "management-file-path": "/Users/kirill/gopath/src/github.com/orbs-network/orbs-network-go/test/e2e/_profile/management.json",
+  "management-consensus-grace-timeout": "0s",
+  "committee-grace-period": "876000h",
+  "block-storage-file-system-data-dir": "/Users/kirill/Downloads/1000002"
+}

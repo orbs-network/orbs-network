@@ -210,11 +210,9 @@ func inflateChainState(csd []*protocol.ContractStateDiff) adapter.ChainState {
 			r := i.NextStateDiffs()
 
 			// copying here is very important to free up the underlying structures
-			detachedBuffer := make([]byte, len(r.Raw()))
-			copy(detachedBuffer, r.Raw())
-
-			diffToApply := protocol.StateRecordReader(detachedBuffer)
-			contractMap[string(diffToApply.Key())] = append([]byte{}, diffToApply.Value()...)
+			key := string(append([]byte{}, r.Key()...))
+			value := append([]byte{}, r.Value()...)
+			contractMap[key] = value
 		}
 	}
 	return result
