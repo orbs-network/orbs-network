@@ -13,7 +13,7 @@
     "moment": "^2.24.0",
     "sprintf-js": "^1.1.2",
     "@orbs-network/orbs-nebula": "*",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",
